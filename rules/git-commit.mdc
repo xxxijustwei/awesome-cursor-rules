@@ -1,36 +1,60 @@
 ---
 description: A comprehensive guide for standardizing Git commit messages using conventional commits format, ensuring consistent and semantic versioning-friendly commit history across the project.
 globs: 
+alwaysApply: true
 ---
-    ### Commit Message Guidelines
-    - Whenever you are asked for a commit message, or got prompted with "/commit" slash command, always suggest a conventional commit optionally with a scope in all lowercase letters. Here are some details about the commit structure.
-    <type>[optional scope]: <description>
-    [optional body]
-    [optional footer(s)]
-    - The commit contains the following structural elements, to communicate intent to the consumers of your library:
-        - fix: a commit of the type fix patches a bug in your codebase (this correlates with PATCH in Semantic Versioning).
-        - feat: a commit of the type feat introduces a new feature to the codebase (this correlates with MINOR in Semantic Versioning).
-        - BREAKING CHANGE: a commit that has a footer BREAKING CHANGE:, or appends a ! after the type/scope, introduces a breaking API change (correlating with MAJOR in Semantic Versioning). A BREAKING CHANGE can be part of commits of any type.
-        - types other than fix: and feat: are allowed, for example @commitlint/config-conventional (based on the Angular convention) recommends build:, chore:, ci:, docs:, style:, refactor:, perf:, test:, and others.
-    - Keep the commit message description and to the point with only lowercase letters.
-    - Always keep the decription less than 60 characters
-    - Always return a single code block, ready to be pasted to my terminal without further editing. Make sure you return the command to commit, not just the commit message.
-    - Do not explain your thoughts and actions. Just give me the commit message in all lowercase letters.
-    - Try your best to determine the <type> of a commit. 
-    - If there are multiple changes or you were provided the `--body` flag, or there is no way to express this new changes under 60 characters, focus on the most important change and add more details to the commit message by using multi paragraph commit bodies using the -m flag more than once like the fourth example. This should be in all lowercase as well.
-        - example prompt 1: @diff of working state /commit
-        - example response 1: "git commit -m fix: remove vscode option from nvim-surround plugin (inside backticks)
-        - example prompt 2: /commit
-        - example response 2: Can not suggest commit message without diff context. Please provide the diff context.
-        - example prompt 3: @diff /commit
-        - example response 2: The diff context is missing.
-        - example prompt 4: @diff /commit --body
-        - example response 4: 
-    ```shell
-    git add .
-    git commit -m "fix: prevent racing of requests" -m "- Add nuqs library for URL state management
-    - Update zustand to version 4.5.5
-    - Update package.json and bun.lockb
-    - Add new editor components and types
-    - Other description"
-    ```
+### Commit Message Guidelines
+
+#### Format
+<type>[optional scope]: <description>
+[optional body]
+[optional footer(s)]
+
+#### Core Rules
+- Always use conventional commits format
+- Description must be in lowercase and under 60 characters
+- Return complete git command in a code block
+- No explanations needed, just the command
+
+#### Types
+- fix: patch a bug (PATCH)
+- feat: new feature (MINOR)
+- feat!: or BREAKING CHANGE: in footer (MAJOR)
+- Other types: build, chore, ci, docs, style, refactor, perf, test
+
+#### Multi-line Commits
+Use -m flag multiple times for complex changes:
+```shell
+git commit -m "type: primary change" -m "- detail 1
+- detail 2
+- detail 3"
+```
+
+#### Examples
+1. Simple fix:
+```shell
+git commit -m "fix: resolve memory leak in worker pool"
+```
+
+2. Feature with scope:
+```shell
+git commit -m "feat(auth): add google oauth support"
+```
+
+3. Breaking change:
+```shell
+git commit -m "feat!: change api response format" -m "BREAKING CHANGE: new response structure requires client update"
+```
+
+4. Multiple changes with body:
+```shell
+git commit -m "refactor: improve code organization" -m "- extract shared utilities
+- implement new folder structure
+- update import paths
+- add type definitions"
+```
+
+#### Invalid Examples
+❌ "Fix bug" (missing type)
+❌ "fix: Bug Fix" (not lowercase)
+❌ "feat: implement new authentication system and add user roles plus permissions" (too long)

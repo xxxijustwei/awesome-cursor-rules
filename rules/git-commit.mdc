@@ -25,6 +25,7 @@ alwaysApply: true
 #### Multi-line Commits
 Use -m flag multiple times for complex changes:
 ```shell
+git add .
 git commit -m "type: primary change" -m "- detail 1
 - detail 2
 - detail 3"
@@ -33,21 +34,25 @@ git commit -m "type: primary change" -m "- detail 1
 #### Examples
 1. Simple fix:
 ```shell
+git add .
 git commit -m "fix: resolve memory leak in worker pool"
 ```
 
 2. Feature with scope:
 ```shell
+git add .
 git commit -m "feat(auth): add google oauth support"
 ```
 
 3. Breaking change:
 ```shell
+git add .
 git commit -m "feat!: change api response format" -m "BREAKING CHANGE: new response structure requires client update"
 ```
 
 4. Multiple changes with body:
 ```shell
+git add .
 git commit -m "refactor: improve code organization" -m "- extract shared utilities
 - implement new folder structure
 - update import paths

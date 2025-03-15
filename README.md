@@ -1,4 +1,4 @@
-# Cursor Rules - Best Practices Collection
+# Awesome Cursor Rules
 
 A comprehensive collection of best practices and guidelines for modern web development with TypeScript, React, Next.js, and popular libraries.
 

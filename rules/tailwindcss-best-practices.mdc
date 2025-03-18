@@ -1,7 +1,7 @@
 ---
-name: tailwindcss-best-practices.mdc
 description: Best practices for using Tailwind CSS in your project
-globs: **/*.{ts,tsx,css}
+globs: *.tsx
+alwaysApply: false
 ---
 
 # Tailwind CSS Best Practices

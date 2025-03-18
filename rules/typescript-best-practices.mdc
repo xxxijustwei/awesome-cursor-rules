@@ -1,6 +1,7 @@
 ---
 description: TypeScript best practices guide covering type safety, patterns, and architectural principles for maintainable and robust applications.
-globs: **/*.{ts,tsx}
+globs: *.tsx,*.ts
+alwaysApply: false
 ---
 # TypeScript Best Practices Guide
 

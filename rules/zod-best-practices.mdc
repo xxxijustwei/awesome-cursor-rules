@@ -1,7 +1,7 @@
 ---
-name: zod-best-practices.mdc
 description: Best practices for schema validation with Zod
-globs: **/*.{ts,tsx}
+globs: *.tsx,*.ts
+alwaysApply: false
 ---
 
 # Zod Best Practices

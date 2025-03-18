@@ -1,7 +1,7 @@
 ---
-name: react-hook-form-zod-best-practices.mdc
 description: Best practices for form handling with React Hook Form and Zod
-globs: **/*.{ts,tsx}
+globs: *.tsx,*.ts
+alwaysApply: false
 ---
 
 # React Hook Form with Zod Best Practices

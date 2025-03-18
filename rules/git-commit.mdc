@@ -1,5 +1,5 @@
 ---
-description: A comprehensive guide for standardizing Git commit messages using conventional commits format, ensuring consistent and semantic versioning-friendly commit history across the project.
+description: 
 globs: 
 alwaysApply: true
 ---

@@ -1,7 +1,7 @@
 ---
-name: react-query-best-practices.mdc
 description: Best practices for data fetching and caching with React Query
-globs: **/*.{ts,tsx}
+globs: *.tsx,*.ts
+alwaysApply: false
 ---
 
 # React Query Best Practices

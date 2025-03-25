@@ -12,6 +12,7 @@ alwaysApply: false
 - Avoid using `any` type; prefer `unknown` for truly unknown values
 - Enable strict null checks and strict function types
 
+```ts
 // ❌ Bad
 let value: any;
 function process(data: any) { }
@@ -19,12 +20,14 @@ function process(data: any) { }
 // ✅ Good
 let value: unknown;
 function process<T>(data: T) { }
+```
 
 ### Type Declarations
 - Use explicit return types for functions
 - Prefer interfaces over type aliases for object definitions
 - Use const assertions for literal types
 
+```ts
 // ❌ Bad
 const handler = (event) => {
   // ...
@@ -47,16 +50,19 @@ const config = {
   apiUrl: 'https://api.example.com',
   timeout: 5000,
 } as const;
+```
 
 ### Null Handling
 - Use optional chaining and nullish coalescing
 - Implement proper null checks
 
+```ts
 // ❌ Bad
 const userName = user && user.profile && user.profile.name;
 
 // ✅ Good
 const userName = user?.profile?.name ?? 'Anonymous';
+```
 
 ## Advanced Patterns
 
@@ -64,6 +70,7 @@ const userName = user?.profile?.name ?? 'Anonymous';
 - Use literal types for discriminators
 - Implement exhaustive type checking
 
+```ts
 type Success = {
   status: 'success';
   data: unknown;
@@ -88,11 +95,13 @@ function handleResult(result: Result): void {
       break;
   }
 }
+```
 
 ### Generic Constraints
 - Use constraints to ensure type safety
 - Implement bounded polymorphism when needed
 
+```ts
 interface HasId {
   id: string;
 }
@@ -101,11 +110,13 @@ interface HasId {
 function findById<T extends HasId>(items: T[], id: string): T | undefined {
   return items.find(item => item.id === id);
 }
+```
 
 ### Type Guards
 - Implement custom type guards for runtime type checking
 - Use assertion functions for complex validations
 
+```ts
 function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
@@ -115,6 +126,7 @@ function assertIsString(value: unknown): asserts value is string {
     throw new Error('Value must be a string');
   }
 }
+```
 
 ## Error Handling
 
@@ -122,6 +134,7 @@ function assertIsString(value: unknown): asserts value is string {
 - Define custom error types
 - Use discriminated unions for error handling
 
+```ts
 class ApiError extends Error {
   constructor(
     message: string,
@@ -135,11 +148,13 @@ class ApiError extends Error {
 type Result<T> = 
   | { success: true; data: T }
   | { success: false; error: ApiError };
+```
 
 ### Async Operations
 - Use async/await with proper error handling
 - Implement retry mechanisms for unreliable operations
 
+```ts
 async function fetchWithRetry<T>(
   url: string,
   options: RequestInit,
@@ -158,6 +173,7 @@ async function fetchWithRetry<T>(
     throw error;
   }
 }
+```
 
 ## Performance Considerations
 
@@ -165,6 +181,7 @@ async function fetchWithRetry<T>(
 - Let TypeScript infer types when possible
 - Use explicit types for function parameters and returns
 
+```ts
 // ❌ Bad - Redundant type annotation
 const numbers: number[] = [1, 2, 3];
 
@@ -175,11 +192,13 @@ const numbers = [1, 2, 3];
 function calculateTotal(items: number[]): number {
   return items.reduce((sum, item) => sum + item, 0);
 }
+```
 
 ### Optimization
 - Use readonly arrays and tuples when applicable
 - Implement proper type caching for complex types
 
+```ts
 // Readonly arrays
 const VALID_STATUSES = ['active', 'inactive'] as const;
 type Status = typeof VALID_STATUSES[number];
@@ -190,6 +209,7 @@ type CachedComplexType = {
 } & {
   readonly [K in keyof Base]: Base[K];
 };
+```
 
 ## Testing
 
@@ -197,6 +217,7 @@ type CachedComplexType = {
 - Use `expectType` and `expectError` from `tsd`
 - Implement proper type coverage
 
+```ts
 import { expectType } from 'tsd';
 
 // Type testing
@@ -213,3 +234,4 @@ describe('type safety', () => {
     expectType<string | null>(result);
   });
 });
+```

@@ -4,260 +4,330 @@ globs: *.tsx,*.ts
 alwaysApply: false
 ---
 
-# React Hook Form Best Practices
+# Zustand Best Practices
 
-## 1. Type Safety
+## 1. Store Organization
 
-### Define Strong Types for Form Data
-Use TypeScript interfaces/types for form data:
+### Create Type-Safe Stores
+Define stores with proper typing:
 
-// ✅ Good
-interface LoginFormData {
-  email: string;
-  password: string;
-  rememberMe: boolean;
+```tsx
+// ✅ Good - src/store/auth.store.ts
+interface User {
+  id: string
+  email: string
+  name: string
 }
 
-const { register, handleSubmit } = useForm<LoginFormData>({
-  defaultValues: {
-    email: '',
-    password: '',
-    rememberMe: false
+interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  // Actions
+  login: (credentials: { email: string; password: string }) => Promise<void>
+  logout: () => Promise<void>
+  updateUser: (user: Partial<User>) => void
+}
+
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+
+  login: async (credentials) => {
+    set({ isLoading: true })
+    try {
+      const user = await loginApi(credentials)
+      set({ user, isAuthenticated: true })
+    } catch (error) {
+      throw error
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  logout: async () => {
+    set({ isLoading: true })
+    try {
+      await logoutApi()
+      set({ user: null, isAuthenticated: false })
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  updateUser: (userData) => {
+    set((state) => ({
+      user: state.user ? { ...state.user, ...userData } : null
+    }))
   }
-})
+}))
+```
 
-## 2. Form Validation
+## 2. Store Slices
 
-### Use Zod for Schema Validation
-Implement strong validation with Zod:
+### Split Large Stores into Slices
+Organize complex stores into slices:
 
-// ✅ Good
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+```tsx
+// ✅ Good - src/store/slices/cart.ts
+interface CartSlice {
+  items: CartItem[]
+  addItem: (item: CartItem) => void
+  removeItem: (id: string) => void
+  clearCart: () => void
+}
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  rememberMe: z.boolean()
-})
+export const createCartSlice: StateCreator<StoreState, [], [], CartSlice> = 
+  (set) => ({
+    items: [],
+    addItem: (item) => 
+      set((state) => ({ 
+        items: [...state.items, item] 
+      })),
+    removeItem: (id) => 
+      set((state) => ({
+        items: state.items.filter((item) => item.id !== id)
+      })),
+    clearCart: () => set({ items: [] })
+  })
 
-const {
-  register,
-  handleSubmit,
-  formState: { errors }
-} = useForm<LoginFormData>({
-  resolver: zodResolver(loginSchema)
-})
+// src/store/index.ts
+interface StoreState extends CartSlice, UserSlice, UISlice {}
 
-### Custom Validation Rules
-Implement complex validation rules:
+export const useStore = create<StoreState>()((...args) => ({
+  ...createCartSlice(...args),
+  ...createUserSlice(...args),
+  ...createUISlice(...args)
+}))
+```
 
-// ✅ Good
-const passwordSchema = z.object({
-  password: z.string().min(8),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
-})
+## 3. Selectors
 
-## 3. Form Organization
+### Use Efficient Selectors
+Implement selective state updates:
 
-### Use Form Context for Complex Forms
-Organize large forms with FormProvider:
-
-// ✅ Good
-const FormWrapper = ({ children }: { children: React.ReactNode }) => {
-  const methods = useForm<FormData>()
-  
-  return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
-        {children}
-      </form>
-    </FormProvider>
+```tsx
+// ✅ Good - src/store/selectors.ts
+export const useCartTotal = () => 
+  useStore（
+    useShallow((state) => state.items.reduce(
+        (total, item) => total + item.price * item.quantity, 0)
+    )
   )
-}
 
-const NestedComponent = () => {
-  const { register } = useFormContext()
-  return <input {...register('fieldName')} />
-}
+export const useCartItemCount = () => 
+  useStore(
+    (state) => state.items.length
+  )
 
-### Separate Form Components
-Break down complex forms into smaller components:
-
-// ✅ Good
-const AddressFields = () => {
-  const { register } = useFormContext()
+// In component
+const CartSummary = () => {
+  const total = useCartTotal()
+  const itemCount = useCartItemCount()
   
   return (
     <div>
-      <input {...register('street')} />
-      <input {...register('city')} />
-      <input {...register('zipCode')} />
+      <span>Items: {itemCount}</span>
+      <span>Total: ${total}</span>
     </div>
   )
 }
+```
+## 4. Middleware and Persistence
 
-## 4. Error Handling
+### Implement Storage Persistence
+Use middleware for persistence:
 
-### Implement Consistent Error Display
-Create reusable error components:
+```tsx
+// ✅ Good - src/store/middleware.ts
+import { persist } from 'zustand/middleware'
 
-// ✅ Good
-const FormField = ({ name, label, type = 'text' }: FormFieldProps) => {
-  const { register, formState: { errors } } = useFormContext()
-  
-  return (
-    <div>
-      <label htmlFor={name}>{label}</label>
-      <input
-        id={name}
-        type={type}
-        {...register(name)}
-        className={cn(
-          'base-input',
-          errors[name] && 'error-input'
-        )}
-      />
-      {errors[name] && (
-        <span className="text-red-500 text-sm">
-          {errors[name]?.message as string}
-        </span>
-      )}
-    </div>
+export const usePersistedStore = create(
+  persist<StoreState>(
+    (set) => ({
+      // state and actions
+    }),
+    {
+      name: 'app-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        // Only persist specific state
+        user: state.user,
+        settings: state.settings
+      })
+    }
   )
-}
-
-## 5. Form Submission
-
-### Handle Async Submission
-Properly handle async form submission:
-
-// ✅ Good
-const onSubmit = async (data: FormData) => {
-  try {
-    setSubmitting(true)
-    await submitForm(data)
-    toast.success('Form submitted successfully')
-    reset()
-  } catch (error) {
-    toast.error('Failed to submit form')
-    console.error(error)
-  } finally {
-    setSubmitting(false)
-  }
-}
-
-## 6. Performance Optimization
-
-### Use Mode Configuration
-Configure validation mode appropriately:
-
-// ✅ Good
-const { register } = useForm({
-  mode: 'onBlur',  // Validate on blur
-  reValidateMode: 'onChange',  // Re-validate on change after blur
-})
-
-### Controlled Components
-Use controlled components when necessary:
-
-// ✅ Good
-const { control } = useForm()
-
-return (
-  <Controller
-    name="select"
-    control={control}
-    render={({ field }) => (
-      <Select
-        {...field}
-        options={options}
-      />
-    )}
-  />
 )
+```
 
-## 7. Default Values
+## 5. Actions and Updates
 
-### Handle Default Values Properly
-Set default values correctly:
+### Implement Atomic Updates
+Use atomic state updates:
 
-// ✅ Good
-const { register, reset } = useForm({
-  defaultValues: async () => {
-    const user = await fetchUser(userId)
-    return {
-      name: user.name,
-      email: user.email
+```tsx
+// ✅ Good - src/store/todo.ts
+interface TodoState {
+  todos: Todo[]
+  addTodo: (todo: Todo) => void
+  toggleTodo: (id: string) => void
+  updateTodo: (id: string, updates: Partial<Todo>) => void
+}
+
+export const useTodoStore = create<TodoState>()((set) => ({
+  todos: [],
+  
+  addTodo: (todo) => 
+    set((state) => ({
+      todos: [...state.todos, todo]
+    })),
+    
+  toggleTodo: (id) => 
+    set((state) => ({
+      todos: state.todos.map((todo) =>
+        todo.id === id 
+          ? { ...todo, completed: !todo.completed }
+          : todo
+      )
+    })),
+    
+  updateTodo: (id, updates) =>
+    set((state) => ({
+      todos: state.todos.map((todo) =>
+        todo.id === id 
+          ? { ...todo, ...updates }
+          : todo
+      )
+    }))
+}))
+```
+
+## 6. Async Actions
+
+### Handle Async State
+Manage loading and error states:
+
+```tsx
+// ✅ Good - src/store/products.ts
+interface ProductsState {
+  products: Product[]
+  isLoading: boolean
+  error: Error | null
+  fetchProducts: () => Promise<void>
+}
+
+export const useProductsStore = create<ProductsState>()((set) => ({
+  products: [],
+  isLoading: false,
+  error: null,
+
+  fetchProducts: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const products = await fetchProductsApi()
+      set({ products, isLoading: false })
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error : new Error('Unknown error'),
+        isLoading: false 
+      })
     }
   }
-})
+}))
+```
 
-// Reset form with new values
-useEffect(() => {
-  reset(userData)
-}, [userData, reset])
+## 7. DevTools Integration
 
-## 8. Field Arrays
+### Setup Development Tools
+Implement DevTools for debugging:
 
-### Manage Dynamic Form Fields
-Handle dynamic form fields efficiently:
+```tsx
+// ✅ Good - src/store/index.ts
+import { devtools } from 'zustand/middleware'
 
-// ✅ Good
-const { fields, append, remove } = useFieldArray({
-  control,
-  name: "items"
-})
-
-return (
-  <>
-    {fields.map((field, index) => (
-      <div key={field.id}>
-        <input {...register(`items.${index}.name`)} />
-        <button type="button" onClick={() => remove(index)}>
-          Remove
-        </button>
-      </div>
-    ))}
-    <button type="button" onClick={() => append({ name: '' })}>
-      Add Item
-    </button>
-  </>
+export const useStore = create<StoreState>()(
+  devtools(
+    persist(
+      (set) => ({
+        // state and actions
+      }),
+      {
+        name: 'app-storage'
+      }
+    ),
+    {
+      name: 'App Store',
+      enabled: process.env.NODE_ENV === 'development'
+    }
+  )
 )
+```
 
-## 9. Form State Management
+## 8. Type Safety
 
-### Track Form State
-Monitor form state effectively:
+### Ensure Type Safety
+Use TypeScript effectively:
 
-// ✅ Good
-const {
-  formState: {
-    isDirty,
-    isSubmitting,
-    isSubmitted,
-    isValid
-  }
-} = useForm()
+```tsx
+// ✅ Good - src/store/types.ts
+type Status = 'idle' | 'loading' | 'success' | 'error'
 
-return (
-  <button
-    type="submit"
-    disabled={!isDirty || !isValid || isSubmitting}
-  >
-    {isSubmitting ? 'Submitting...' : 'Submit'}
-  </button>
-)
+interface AsyncState<T> {
+  data: T | null
+  status: Status
+  error: Error | null
+}
+
+export const createAsyncSlice = <T,>(
+  initialData: T | null = null
+): AsyncState<T> => ({
+  data: initialData,
+  status: 'idle',
+  error: null
+})
+```
+
+## 9. Performance Optimization
+
+### Optimize Re-renders
+Use selective updates and memoization:
+
+```tsx
+// ✅ Good - src/components/ProductList.tsx
+export const ProductList = () => {
+  const products = useStore(
+    (state) => state.products,
+    shallow
+  )
+  
+  return (
+    <div>
+      {products.map((product) => (
+        <ProductItem 
+          key={product.id}
+          product={product}
+        />
+      ))}
+    </div>
+  )
+}
+
+const ProductItem = memo(({ product }: { product: Product }) => {
+  return (
+    <div>{product.name}</div>
+  )
+})
+```
 
 Remember:
-- Always use TypeScript for type safety
-- Implement proper validation with Zod
-- Break down complex forms into smaller components
-- Handle errors consistently
-- Manage form state effectively
-- Optimize performance with appropriate mode settings
-- Use FormProvider for complex forms
+- Keep stores focused and single-responsibility
+- Use TypeScript for type safety
+- Implement proper error handling
+- Use selectors for efficient updates
 - Handle async operations properly
+- Implement persistence when needed
+- Use middleware for advanced features
+- Optimize for performance
+- Use DevTools in development
+- Keep state updates atomic

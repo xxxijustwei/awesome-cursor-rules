@@ -17,6 +17,7 @@ alwaysApply: false
 
 Create a base axios instance with proper configuration:
 
+```ts
 // lib/axios.ts
 import axios from 'axios';
 
@@ -27,11 +28,13 @@ export const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+```
 
 ## Type Safety
 
 ### Define Response Types
 
+```ts
 // types/api.ts
 export interface ApiResponse<T> {
   data: T;
@@ -50,6 +53,7 @@ const getUser = async (id: string): Promise<ApiResponse<User>> => {
   const response = await axiosInstance.get<ApiResponse<User>>(`/users/${id}`);
   return response.data;
 };
+```
 
 ## Best Practices
 
@@ -57,6 +61,7 @@ const getUser = async (id: string): Promise<ApiResponse<User>> => {
 
 ✅ DO create service modules for API calls
 
+```ts
 // services/api.service.ts
 export class ApiService<T> {
   constructor(
@@ -73,6 +78,7 @@ export class ApiService<T> {
     return data;
   }
 }
+```
 
 // Usage
 const userService = new ApiService<User>('/api/users');
@@ -92,6 +98,7 @@ const Component = () => {
 
 ✅ DO create custom error handlers
 
+```ts
 // lib/error-handler.ts
 export class ApiError extends Error {
   constructor(
@@ -114,11 +121,13 @@ export const handleAxiosError = (error: AxiosError): ApiError => {
   }
   return new ApiError(500, error.message);
 };
+```
 
 ### 3. Request Interceptors
 
 ✅ DO use interceptors for common operations
 
+```ts
 // lib/axios.ts
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -141,74 +150,13 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-### 4. Request Hooks
-
-✅ DO create reusable hooks for data fetching
-
-// hooks/useApi.ts
-export function useApi<T>(url: string) {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axiosInstance.get<T>(url, {
-          signal: abortController.signal,
-        });
-        setData(response.data);
-      } catch (err) {
-        if (err.name === 'CanceledError') return;
-        setError(err as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [url]);
-
-  return { data, error, isLoading };
-}
-
-### 5. Caching Strategy
-
-✅ DO implement caching for repeated requests
-
-// lib/cache.ts
-const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-export const setupCache = (axiosInstance: AxiosInstance) => {
-  axiosInstance.interceptors.request.use(async (config) => {
-    const key = `${config.method}-${config.url}-${JSON.stringify(config.params)}`;
-    const cached = cache.get(key);
-
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return Promise.reject({
-        config,
-        response: { data: cached.data },
-        isCache: true,
-      });
-    }
-
-    return config;
-  });
-};
+```
 
 ## Testing
 
 ### Mock Axios in Tests
 
+```ts
 // __tests__/api.test.ts
 import { axiosInstance } from '@/lib/axios';
 import { getUserProfile } from '@/services/user';
@@ -231,11 +179,13 @@ describe('API Services', () => {
     await expect(getUserProfile('1')).rejects.toThrow('Network Error');
   });
 });
+```
 
 ## Common Patterns
 
 ### Factory Pattern
 
+```ts
 // services/api-factory.ts
 export const createApiService = <T>(baseUrl: string) => ({
   getAll: async () => {
@@ -262,6 +212,7 @@ export const createApiService = <T>(baseUrl: string) => ({
 // Usage
 const userApi = createApiService<User>('/api/users');
 const users = await userApi.getAll();
+```
 
 ## Tips and Gotchas
 
@@ -273,9 +224,3 @@ const users = await userApi.getAll();
 6. Use environment variables for API URLs
 7. Implement retry logic for failed requests
 8. Add request/response logging in development
-
-## Related Resources
-
-- [Axios Documentation](mdc:https:/axios-http.com)
-- [TypeScript Best Practices](mdc:typescript-best-practices.mdc)
-- [React Query Best Practices](mdc:react-query-best-practices.mdc)

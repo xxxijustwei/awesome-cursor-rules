@@ -11,6 +11,7 @@ alwaysApply: false
 ### Define Type-Safe Schemas
 Create strongly typed schemas with Zod:
 
+```tsx
 // ✅ Good
 const loginSchema = z.object({
   email: z.string()
@@ -25,12 +26,14 @@ const loginSchema = z.object({
 
 // Infer types from schema
 type LoginFormData = z.infer<typeof loginSchema>
+```
 
 ## 2. Form Setup
 
 ### Initialize Form with Zod Resolver
 Set up form with proper types and validation:
 
+```tsx
 // ✅ Good
 const LoginForm = () => {
   const form = useForm<LoginFormData>({
@@ -44,12 +47,14 @@ const LoginForm = () => {
 
   return <form onSubmit={form.handleSubmit(onSubmit)}>...</form>
 }
+```
 
 ## 3. Complex Validation
 
 ### Custom Validation Rules
 Implement complex validation scenarios:
 
+```tsx
 // ✅ Good
 const signupSchema = z.object({
   password: z.string().min(8),
@@ -61,10 +66,12 @@ const signupSchema = z.object({
     path: ["confirmPassword"]
   }
 )
+```
 
 ### Conditional Validation
 Handle conditional validation requirements:
 
+```tsx
 // ✅ Good
 const userSchema = z.object({
   employmentStatus: z.enum(['employed', 'unemployed', 'student']),
@@ -82,12 +89,14 @@ const userSchema = z.object({
     path: ["companyName"]
   }
 )
+```
 
 ## 4. Reusable Components
 
 ### Create Type-Safe Form Fields
 Build reusable form components with proper typing:
 
+```tsx
 // ✅ Good
 interface FormFieldProps<T extends FieldValues> {
   name: Path<T>;
@@ -121,12 +130,14 @@ const FormField = <T extends FieldValues>({
     </div>
   )
 }
+```
 
 ## 5. Form Arrays with Zod
 
 ### Handle Dynamic Fields
 Manage arrays of form fields with proper validation:
 
+```tsx
 // ✅ Good
 const todoSchema = z.object({
   tasks: z.array(
@@ -164,12 +175,14 @@ const TodoForm = () => {
     </form>
   )
 }
+```
 
 ## 6. Error Handling
 
 ### Custom Error Messages
 Customize error messages with Zod:
 
+```tsx
 // ✅ Good
 const userSchema = z.object({
   username: z.string()
@@ -181,12 +194,14 @@ const userSchema = z.object({
     .min(18, 'Must be at least 18 years old')
     .max(100, 'Age seems invalid')
 })
+```
 
 ## 7. Async Validation
 
 ### Handle Async Validation
 Implement async validation with Zod:
 
+```tsx
 // ✅ Good
 const signupSchema = z.object({
   email: z.string().email()
@@ -200,12 +215,14 @@ const signupSchema = z.object({
     path: ["email"]
   }
 )
+```
 
 ## 8. Form Submission
 
 ### Type-Safe Form Submission
 Handle form submission with proper typing:
 
+```tsx
 // ✅ Good
 const onSubmit = async (data: z.infer<typeof formSchema>) => {
   try {
@@ -226,6 +243,7 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
     }
   }
 }
+```
 
 Remember:
 - Always define schemas at the top level for reusability

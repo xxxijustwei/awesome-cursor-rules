@@ -29,29 +29,34 @@ Follow a consistent order for your utility classes:
 ### Extract Common Patterns
 Use @apply for frequently reused patterns:
 
+```css
 /* tailwind.css */
 @layer components {
   .btn-primary {
     @apply px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors;
   }
 }
+```
 
 ## 2. Responsive Design
 
 ### Use Mobile-First Approach
 Start with mobile styles and add breakpoint modifiers for larger screens:
 
+```tsx
 // ✅ Good
 <div className="w-full md:w-1/2 lg:w-1/3">
 
 // ❌ Bad - desktop-first approach
 <div className="w-1/3 md:w-1/2 sm:w-full">
+```
 
 ## 3. Performance
 
 ### Avoid Large Class Lists
 Break down components when class lists become too long:
 
+```tsx
 // ✅ Good
 const CardHeader = () => (
   <div className="flex items-center p-4 border-b">
@@ -68,12 +73,14 @@ const Card = () => (
 
 // ❌ Bad
 <div className="rounded-lg shadow-lg bg-white flex items-center p-4 border-b hover:shadow-xl transition-shadow duration-300 cursor-pointer active:scale-95">
+```
 
 ## 4. Maintainability
 
 ### Use Custom Theme Values
 Extend theme in tailwind.config.js for consistent values:
 
+```js
 // tailwind.config.js
 module.exports = {
   theme: {
@@ -91,10 +98,12 @@ module.exports = {
     },
   },
 }
+```
 
 ### Group Related Classes with clsx/cn
 Use utility functions for conditional classes:
 
+```tsx
 import { cn } from "@/lib/utils";
 
 // ✅ Good
@@ -108,23 +117,27 @@ import { cn } from "@/lib/utils";
 
 // ❌ Bad
 <button className={`px-4 py-2 rounded-lg ${isActive ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}>
+```
 
 ## 5. Dark Mode
 
 ### Use Dark Mode Classes Consistently
 Implement dark mode with the 'dark:' prefix:
 
+```tsx
 // ✅ Good
 <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
 
 // ❌ Bad - inconsistent or missing dark mode styles
 <div className="bg-white text-gray-900">
+```
 
 ## 6. Accessibility
 
 ### Use Semantic HTML with Tailwind
 Maintain semantic HTML while styling with Tailwind:
 
+```tsx
 // ✅ Good
 <main className="container mx-auto px-4">
   <h1 className="text-2xl font-bold">Title</h1>
@@ -140,12 +153,14 @@ Maintain semantic HTML while styling with Tailwind:
     <span className="hover:underline">Link</span>
   </div>
 </div>
+```
 
 ## 7. State Management
 
 ### Use State Variants Consistently
 Handle interactive states with consistent patterns:
 
+```tsx
 // ✅ Good
 <button className="
   bg-blue-500
@@ -157,12 +172,14 @@ Handle interactive states with consistent patterns:
 
 // ❌ Bad - inconsistent or missing states
 <button className="bg-blue-500 hover:bg-blue-600">
+```
 
 ## 8. Media Queries
 
 ### Use Built-in Breakpoints
 Stick to Tailwind's default breakpoints or extend them in config:
 
+```tsx
 // ✅ Good
 <div className="
   grid
@@ -174,6 +191,7 @@ Stick to Tailwind's default breakpoints or extend them in config:
 
 // ❌ Bad - custom media queries
 <div className="grid grid-cols-1 @media(min-width: 678px):grid-cols-2">
+```
 
 Remember:
 - Keep components focused and single-responsibility

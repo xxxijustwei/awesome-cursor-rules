@@ -11,6 +11,7 @@ alwaysApply: false
 ### Define Strong Types for Form Data
 Use TypeScript interfaces/types for form data:
 
+```tsx
 // ✅ Good
 interface LoginFormData {
   email: string;
@@ -25,12 +26,14 @@ const { register, handleSubmit } = useForm<LoginFormData>({
     rememberMe: false
   }
 })
+```
 
 ## 2. Form Validation
 
 ### Use Zod for Schema Validation
 Implement strong validation with Zod:
 
+```tsx
 // ✅ Good
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -48,10 +51,12 @@ const {
 } = useForm<LoginFormData>({
   resolver: zodResolver(loginSchema)
 })
+```
 
 ### Custom Validation Rules
 Implement complex validation rules:
 
+```tsx
 // ✅ Good
 const passwordSchema = z.object({
   password: z.string().min(8),
@@ -60,12 +65,14 @@ const passwordSchema = z.object({
   message: "Passwords don't match",
   path: ["confirmPassword"]
 })
+```
 
 ## 3. Form Organization
 
 ### Use Form Context for Complex Forms
 Organize large forms with FormProvider:
 
+```tsx
 // ✅ Good
 const FormWrapper = ({ children }: { children: React.ReactNode }) => {
   const methods = useForm<FormData>()
@@ -83,10 +90,12 @@ const NestedComponent = () => {
   const { register } = useFormContext()
   return <input {...register('fieldName')} />
 }
+```
 
 ### Separate Form Components
 Break down complex forms into smaller components:
 
+```tsx
 // ✅ Good
 const AddressFields = () => {
   const { register } = useFormContext()
@@ -99,12 +108,14 @@ const AddressFields = () => {
     </div>
   )
 }
+```
 
 ## 4. Error Handling
 
 ### Implement Consistent Error Display
 Create reusable error components:
 
+```tsx
 // ✅ Good
 const FormField = ({ name, label, type = 'text' }: FormFieldProps) => {
   const { register, formState: { errors } } = useFormContext()
@@ -129,12 +140,14 @@ const FormField = ({ name, label, type = 'text' }: FormFieldProps) => {
     </div>
   )
 }
+```
 
 ## 5. Form Submission
 
 ### Handle Async Submission
 Properly handle async form submission:
 
+```tsx
 // ✅ Good
 const onSubmit = async (data: FormData) => {
   try {
@@ -149,21 +162,25 @@ const onSubmit = async (data: FormData) => {
     setSubmitting(false)
   }
 }
+```
 
 ## 6. Performance Optimization
 
 ### Use Mode Configuration
 Configure validation mode appropriately:
 
+```tsx
 // ✅ Good
 const { register } = useForm({
   mode: 'onBlur',  // Validate on blur
   reValidateMode: 'onChange',  // Re-validate on change after blur
 })
+```
 
 ### Controlled Components
 Use controlled components when necessary:
 
+```tsx
 // ✅ Good
 const { control } = useForm()
 
@@ -179,12 +196,14 @@ return (
     )}
   />
 )
+```
 
 ## 7. Default Values
 
 ### Handle Default Values Properly
 Set default values correctly:
 
+```tsx
 // ✅ Good
 const { register, reset } = useForm({
   defaultValues: async () => {
@@ -200,12 +219,14 @@ const { register, reset } = useForm({
 useEffect(() => {
   reset(userData)
 }, [userData, reset])
+```
 
 ## 8. Field Arrays
 
 ### Manage Dynamic Form Fields
 Handle dynamic form fields efficiently:
 
+```tsx
 // ✅ Good
 const { fields, append, remove } = useFieldArray({
   control,
@@ -227,12 +248,14 @@ return (
     </button>
   </>
 )
+```
 
 ## 9. Form State Management
 
 ### Track Form State
 Monitor form state effectively:
 
+```tsx
 // ✅ Good
 const {
   formState: {
@@ -251,6 +274,7 @@ return (
     {isSubmitting ? 'Submitting...' : 'Submit'}
   </button>
 )
+```
 
 Remember:
 - Always use TypeScript for type safety

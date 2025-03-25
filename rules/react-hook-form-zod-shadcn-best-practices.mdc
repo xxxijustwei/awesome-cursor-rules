@@ -3,7 +3,6 @@ description: Best practices for form handling with React Hook Form, Zod and Shad
 globs: *.tsx,*.ts
 alwaysApply: false
 ---
-
 # React Hook Form with Zod and Shadcn UI Best Practices
 
 ## 1. Form Schema and Types
@@ -11,8 +10,8 @@ alwaysApply: false
 ### Define Type-Safe Schemas
 Create strongly typed schemas with Zod:
 
-// ✅ Good - src/lib/validations/auth.ts
-export const loginSchema = z.object({
+```tsx
+const loginSchema = z.object({
   email: z.string()
     .min(1, 'Email is required')
     .email('Invalid email format'),
@@ -23,14 +22,15 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().default(false)
 })
 
-export type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>
+```
 
 ## 2. Form Component Structure
 
 ### Organize Form Components
 Structure your form components properly:
 
-// ✅ Good - src/components/auth/login-form.tsx
+```tsx
 export function LoginForm() {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,11 +42,7 @@ export function LoginForm() {
   })
 
   async function onSubmit(data: LoginFormData) {
-    try {
-      // Handle form submission
-    } catch (error) {
-      // Handle errors
-    }
+    // Handle form submission
   }
 
   return (
@@ -70,104 +66,14 @@ export function LoginForm() {
     </Form>
   )
 }
+```
 
-## 3. Reusable Form Components
-
-### Create Custom Form Components
-Build reusable form components with Shadcn:
-
-// ✅ Good - src/components/ui/form-fields.tsx
-interface FormInputProps<T extends FieldValues> extends FormFieldProps<T> {
-  label: string
-  placeholder?: string
-  description?: string
-}
-
-export function FormInput<T extends FieldValues>({
-  label,
-  name,
-  placeholder,
-  description,
-  control
-}: FormInputProps<T>) {
-  return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <Input placeholder={placeholder} {...field} />
-          </FormControl>
-          {description && <FormDescription>{description}</FormDescription>}
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
-## 4. Complex Form Fields
-
-### Handle Select and Combobox
-Implement complex form controls:
-
-// ✅ Good - src/components/forms/user-preferences-form.tsx
-const roleOptions = [
-  { label: "Admin", value: "admin" },
-  { label: "User", value: "user" },
-] as const
-
-export function UserPreferencesForm() {
-  const form = useForm<UserPreferencesFormData>({
-    resolver: zodResolver(userPreferencesSchema)
-  })
-
-  return (
-    <Form {...form}>
-      <form>
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Role</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {roleOptions.map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
-  )
-}
-
-## 5. Form Arrays with Shadcn
+## 3. Form Arrays with Shadcn
 
 ### Dynamic Form Fields
 Handle dynamic form fields:
 
-// ✅ Good - src/components/forms/task-list-form.tsx
+```tsx
 const taskSchema = z.object({
   tasks: z.array(
     z.object({
@@ -228,128 +134,9 @@ export function TaskListForm() {
     </Form>
   )
 }
-
-## 6. Loading and Error States
-
-### Handle Form States
-Manage loading and error states effectively:
-
-// ✅ Good - src/components/forms/submit-button.tsx
-interface SubmitButtonProps extends ButtonProps {
-  isLoading?: boolean
-  loadingText?: string
-  children: React.ReactNode
-}
-
-export function SubmitButton({
-  isLoading,
-  loadingText = "Please wait...",
-  children,
-  ...props
-}: SubmitButtonProps) {
-  return (
-    <Button
-      type="submit"
-      disabled={isLoading}
-      {...props}
-    >
-      {isLoading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {loadingText}
-        </>
-      ) : (
-        children
-      )}
-    </Button>
-  )
-}
-
-## 7. Form Layout and Styling
-
-### Consistent Form Layout
-Use consistent spacing and layout:
-
-// ✅ Good - src/components/forms/form-wrapper.tsx
-interface FormWrapperProps {
-  title: string
-  description?: string
-  children: React.ReactNode
-}
-
-export function FormWrapper({
-  title,
-  description,
-  children
-}: FormWrapperProps) {
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">{title}</h3>
-        {description && (
-          <p className="text-sm text-muted-foreground">
-            {description}
-          </p>
-        )}
-      </div>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </div>
-  )
-}
-
-## 8. Form Submission and Feedback
-
-### Handle Form Submission
-Implement proper submission handling:
-
-// ✅ Good - src/components/forms/contact-form.tsx
-export function ContactForm() {
-  const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
-
-  const form = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema)
-  })
-
-  async function onSubmit(data: ContactFormData) {
-    startTransition(async () => {
-      try {
-        await submitContact(data)
-        form.reset()
-        toast({
-          title: "Success",
-          description: "Your message has been sent.",
-        })
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-        })
-      }
-    })
-  }
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {/* Form fields */}
-        <SubmitButton isLoading={isPending}>
-          Send Message
-        </SubmitButton>
-      </form>
-    </Form>
-  )
-}
+```
 
 Remember:
 - Use Shadcn's Form components consistently
-- Create reusable form components
-- Handle loading and error states properly
 - Implement proper form validation with Zod
 - Use proper TypeScript types throughout
-- Maintain consistent layout and styling
-- Provide proper user feedback
-- Handle form submission states effectively
